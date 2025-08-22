@@ -74,21 +74,21 @@
         @for (day of row.days; track day.date) {
         <div class="day-cell" cdkDropList
             [cdkDropListData]="{ userId: row.employee.id, date: day.date, schedule: day.schedule }"
-            (cdkDropListDropped)="onShiftDrop($event)">
+            (click)="openShiftForm(row.employee.id, day.date)" (cdkDropListDropped)="onShiftDrop($event)">
             @for (assignment of day.schedule?.shifts; track assignment.assignmentId) {
             @if (assignment.type === 'shift') {
             <div class="shift-card" cdkDrag [cdkDragData]="assignment" [style.background-color]="assignment.roleColor">
                 <div class="shift-time">{{ assignment.startTime }} - {{ assignment.endTime }}</div>
                 <div class="shift-role">{{ assignment.roleName }}</div>
                 <div class="shift-actions">
-                    <span class="material-icons-outlined edit-icon"
+                    <mat-icon class="edit-icon"
                         (click)="$event.stopPropagation(); openShiftForm(row.employee.id, day.date, assignment)">
                         edit_calendar
-                    </span>
-                    <span class="material-icons-outlined delete-icon"
+                    </mat-icon>
+                    <mat-icon class="delete-icon"
                         (click)="$event.stopPropagation(); deleteShift(row.employee.id, day.date, assignment.assignmentId)">
                         highlight_off
-                    </span>
+                    </mat-icon>
                 </div>
             </div>
             }
@@ -96,14 +96,14 @@
             <div class="shift-card time-off-card" cdkDrag [cdkDragData]="assignment">
                 {{ assignment.reason }}
                 <div class="shift-actions">
-                    <span class="material-icons-outlined edit-icon"
+                    <mat-icon class="edit-icon"
                         (click)="$event.stopPropagation(); openShiftForm(row.employee.id, day.date, assignment)">
                         edit_calendar
-                    </span>
-                    <span class="material-icons-outlined delete-icon"
+                    </mat-icon>
+                    <mat-icon class="delete-icon"
                         (click)="$event.stopPropagation(); deleteShift(row.employee.id, day.date, assignment.assignmentId)">
                         highlight_off
-                    </span>
+                    </mat-icon>
                 </div>
             </div>
             }
