@@ -1,19 +1,19 @@
 <div class="app-container">
     <mat-tab-group mat-align-tabs="start" [selectedIndex]="selectedTabIndex"
         (selectedIndexChange)="onTabChange($event)">
-        <mat-tab label="Scheduler">
+        <mat-tab i18n-label="@@mainTabScheduler" label="Scheduler">
             <app-scheduler></app-scheduler>
         </mat-tab>
-        <mat-tab label="Departments">
+        <mat-tab i18n-label="@@mainTabDepartments" label="Departments">
             <app-departments></app-departments>
         </mat-tab>
-        <mat-tab label="Roles">
+        <mat-tab i18n-label="@@mainTabRoles" label="Roles">
             <app-roles></app-roles>
         </mat-tab>
-        <mat-tab label="Employees">
+        <mat-tab i18n-label="@@mainTabEmployees" label="Employees">
             <app-employees></app-employees>
         </mat-tab>
-        <mat-tab label="Shift Templates">
+        <mat-tab i18n-label="@@mainTabShiftTemplates" label="Shift Templates">
             <app-shift-templates></app-shift-templates>
         </mat-tab>
     </mat-tab-group>

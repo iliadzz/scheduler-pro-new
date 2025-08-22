@@ -1,0 +1,40 @@
+/* All previous styles are here, with the following additions to handle the new icons */
+
+.shift-card {
+    /* Existing shift-card styles... */
+    position: relative;
+}
+
+.shift-card .shift-actions {
+    display: none;
+    /* Hidden by default */
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: transparent;
+    gap: 5px;
+    z-index: 10;
+}
+
+.shift-card:hover .shift-actions {
+    display: flex;
+    /* Displayed on hover */
+}
+
+.edit-icon,
+.delete-icon {
+    font-size: 16px;
+    cursor: pointer;
+    color: white;
+    transition: color 0.2s;
+}
+
+.edit-icon:hover {
+    color: #4CAF50;
+    /* Green on hover */
+}
+
+.delete-icon:hover {
+    color: #F44336;
+    /* Red on hover */
+}

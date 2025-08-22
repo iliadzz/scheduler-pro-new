@@ -3,6 +3,15 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Observable, BehaviorSubject, combineLatest, first } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip'; 
+import { provideNativeDateAdapter } from '@angular/material/core';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog';
 
 // Models and Services
 import { Employee } from '../../models/employee.model';
@@ -18,17 +27,8 @@ import { ScheduleService } from '../../services/schedule';
 import { HistoryService } from '../../services/history.service';
 import { MoveOrCopyAssignmentCommand, ClearWeekCommand } from '../../services/schedule.commands';
 
-// Angular Material Modules
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+// ADD this import statement
 import { ShiftFormComponent } from '../shift-form/shift-form';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatTooltipModule } from '@angular/material/tooltip'; // <-- FIX: Import tooltip module
-import { provideNativeDateAdapter } from '@angular/material/core';
-import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog';
 
 export interface EnrichedShiftAssignment extends ShiftAssignment {
   startTime?: string;
@@ -61,7 +61,7 @@ export interface DropListData {
   imports: [
     CommonModule, MatButtonModule, MatIconModule, MatCardModule,
     MatDialogModule, MatDatepickerModule, MatMenuModule, DragDropModule,
-    MatTooltipModule // <-- FIX: Add tooltip module to imports
+    MatTooltipModule 
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './scheduler.html',
@@ -161,6 +161,26 @@ export class SchedulerComponent implements OnInit {
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result) this.currentDate$.next(this.currentDate$.getValue());
+    });
+  }
+
+  deleteShift(userId: string, date: Date, assignmentId: string): void {
+    const dateStr = this.datePipe.transform(date, 'yyyy-MM-dd')!;
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Confirm Deletion',
+        message: 'Are you sure you want to delete this shift?',
+        confirmText: 'Delete'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.scheduleService.deleteAssignment(userId, dateStr, assignmentId).subscribe(() => {
+          this.currentDate$.next(this.currentDate$.getValue());
+        });
+      }
     });
   }
 

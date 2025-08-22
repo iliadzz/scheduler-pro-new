@@ -1,4 +1,4 @@
-<h1 mat-dialog-title>{{ data.employee ? 'Edit Employee' : 'Add New Employee' }}</h1>
+<h1 mat-dialog-title i18n="@@employeeFormTitle">{{ data.employee ? 'Edit Employee' : 'Add New Employee' }}</h1>
 <div mat-dialog-content>
     <form [formGroup]="employeeForm" class="employee-form">
         <mat-form-field>

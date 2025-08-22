@@ -1,6 +1,5 @@
 import { Component, signal, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
 import { DepartmentsComponent } from './components/departments/departments';
