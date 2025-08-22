@@ -20,65 +20,78 @@ body {
 
 /* --- Controls Styling --- */
 .scheduler-controls {
-    padding: 15px;
+    padding: 8px 15px;
     margin-bottom: 20px;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 15px;
-    background-color: #f8f9fa;
-}
-
-.control-group {
-    display: flex;
+    display: flex !important;
+    /* Use !important to override mat-card styles */
+    flex-direction: row !important;
+    /* Explicitly set direction to row */
     align-items: center;
     gap: 8px;
+    background-color: #f8f9fa;
+    overflow-x: auto;
+    box-sizing: border-box;
 }
 
-.scheduler-controls button {
-    background-color: #3498db;
-    color: white;
+/* Vertical divider line between button groups */
+.control-divider {
+    border-left: 1px solid #ccc;
+    height: 24px;
+    margin: 0 8px;
+}
+
+/* --- UNIFIED BUTTON STYLE (Excludes Department Pills) --- */
+.scheduler-controls .mat-mdc-button-base {
+    height: 36px;
     border-radius: 4px;
+    background-color: #3498db !important;
+    /* Light Blue Background */
+    color: white !important;
+    /* White Text and Icons */
+    flex-shrink: 0;
 }
 
-.scheduler-controls button.mat-icon-button {
-    background-color: transparent;
-    color: #34495e;
+/* Unified hover effect */
+.scheduler-controls .mat-mdc-button-base:hover {
+    background-color: #2980b9 !important;
+    /* Darker Blue on Hover */
 }
 
-.scheduler-controls button:hover {
-    background-color: #2980b9;
+/* Sizing for text buttons */
+.scheduler-controls .mat-mdc-flat-button {
+    padding: 0 16px;
 }
 
-.scheduler-controls button.mat-icon-button:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+/* Sizing for icon-only buttons */
+.scheduler-controls .mat-mdc-icon-button {
+    padding: 0;
+    width: 36px;
 }
 
 
-.week-display,
-.date-picker-btn {
-    font-weight: 500;
-    font-size: 1em;
-    padding: 0 10px;
-    color: #2c3e50;
-}
-
+/* --- DEPARTMENT FILTERS (Kept Separate) --- */
 .department-filters {
     display: flex;
     gap: 8px;
     margin-left: auto;
-    /* Pushes filters to the right */
+    /* Pushes it to the right */
 }
 
 .dept-pill {
-    --mdc-outlined-button-outline-color: #ccc;
-    --mdc-outlined-button-label-text-color: #495057;
+    height: 36px;
+    background-color: white !important;
+    color: #495057 !important;
+    border: 1px solid #ccc;
+}
+
+.dept-pill:hover {
+    background-color: #f0f0f0 !important;
 }
 
 .dept-pill.active {
-    background-color: #27ae60;
-    color: white;
-    --mdc-outlined-button-outline-color: #27ae60;
+    background-color: #27ae60 !important;
+    color: white !important;
+    border-color: #27ae60;
 }
 
 
@@ -86,7 +99,6 @@ body {
 .schedule-grid {
     display: grid;
     grid-template-columns: 200px repeat(7, 1fr);
-    /* Employee column + 7 day columns */
     border: 1px solid #ccc;
     background-color: #fff;
     font-size: 0.9em;
@@ -148,7 +160,6 @@ body {
     border: 1px solid rgba(0, 0, 0, 0.1);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     color: white;
-    /* Default text color for cards */
 }
 
 .shift-time {
@@ -162,13 +173,30 @@ body {
 
 .time-off-card {
     background-color: #6c757d;
-    /* Dark grey for time off */
-    font-weight: bold;
 }
-
-/* ADD THIS AT THE END OF THE FILE */
 
 /* Hide the padding on the menu panel that holds the calendar */
 .hidden-calendar-menu .mat-mdc-menu-content {
     padding: 0 !important;
+}
+
+/* Drag and Drop Styles */
+.cdk-drop-list-dragging .cdk-drag {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drag-placeholder {
+    background: #f0f0f0;
+    border: dotted 3px #999;
+    min-height: 60px;
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+    border-radius: 4px;
+}
+
+.cdk-drag-preview {
+    box-sizing: border-box;
+    border-radius: 4px;
+    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+        0 8px 10px 1px rgba(0, 0, 0, 0.14),
+        0 3px 14px 2px rgba(0, 0, 0, 0.12);
 }

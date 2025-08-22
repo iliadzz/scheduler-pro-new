@@ -1,13 +1,12 @@
 import { TestBed } from '@angular/core/testing';
+import { ShiftTemplateService } from './shift-template'; // Import ShiftTemplateService, not ShiftTemplate
 
-import { ShiftTemplate } from './shift-template';
-
-describe('ShiftTemplate', () => {
-  let service: ShiftTemplate;
+describe('ShiftTemplateService', () => { // Describe the service
+  let service: ShiftTemplateService; // Use the correct service type
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(ShiftTemplate);
+    service = TestBed.inject(ShiftTemplateService); // Inject the service
   });
 
   it('should be created', () => {
