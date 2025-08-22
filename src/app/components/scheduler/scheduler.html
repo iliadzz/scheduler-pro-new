@@ -1,30 +1,114 @@
-<div class="schedule-grid" *ngIf="scheduleRows$ | async as rows">
-    <div class="header-cell">Employee</div>
-    <div *ngFor="let day of weekDates" class="header-cell day-header">
-        <div>{{ day | date:'EEE' }}</div>
-        <div class="day-number">{{ day | date:'d' }}</div>
-    </div>
+<div class="scheduler-container">
+    <mat-card class="scheduler-controls">
+        <div class="control-group">
+            <button mat-flat-button (click)="goToThisWeek()">
+                <mat-icon>calendar_today</mat-icon>
+                <span>This Week</span>
+            </button>
+            <button mat-flat-button (click)="changeWeek(-7)">
+                <mat-icon>arrow_back</mat-icon>
+                <span>Prev</span>
+            </button>
 
-    <ng-container *ngFor="let row of rows">
+            <button mat-flat-button class="date-picker-btn" [matMenuTriggerFor]="pickerMenu">
+                {{ weekDates[0] | date:'MMM d' }} - {{ weekDates[6] | date:'MMM d, yyyy' }}
+            </button>
+
+            <button mat-flat-button (click)="changeWeek(7)">
+                <span>Next</span>
+                <mat-icon>arrow_forward</mat-icon>
+            </button>
+        </div>
+
+    </mat-card>
+
+    <mat-menu #pickerMenu="matMenu" class="hidden-calendar-menu">
+        <mat-calendar (selectedChange)="handleDateChange($event)"></mat-calendar>
+    </mat-menu>
+
+
+    @if (scheduleRows$ | async; as rows) {
+    <div class="schedule-grid">
+    </div>
+    }
+</div>
+
+        <div class="control-group">
+            <button mat-flat-button (click)="goToThisWeek()">
+                <mat-icon>calendar_today</mat-icon>
+                <span>This Week</span>
+            </button>
+            <button mat-flat-button (click)="changeWeek(-7)">
+                <mat-icon>arrow_back</mat-icon>
+                <span>Prev</span>
+            </button>
+            <button mat-flat-button class="date-picker-btn">
+                {{ weekDates[0] | date:'MMM d' }} - {{ weekDates[6] | date:'MMM d, yyyy' }}
+            </button>
+            <button mat-flat-button (click)="changeWeek(7)">
+                <span>Next</span>
+                <mat-icon>arrow_forward</mat-icon>
+            </button>
+        </div>
+
+        <div class="control-group">
+            <button mat-flat-button>
+                <mat-icon>content_copy</mat-icon>
+                <span>Copy</span>
+            </button>
+            <button mat-flat-button>Events</button>
+            <button mat-flat-button>
+                <mat-icon>delete_sweep</mat-icon>
+                <span>Clear</span>
+            </button>
+            <button mat-icon-button aria-label="Print schedule">
+                <mat-icon>print</mat-icon>
+            </button>
+        </div>
+
+        <div class="department-filters">
+            @for(dept of (departments$ | async); track dept.id){
+            <button mat-stroked-button class="dept-pill" [class.active]="isDepartmentActive(dept.id)"
+                (click)="toggleDepartmentFilter(dept.id)">
+                {{ dept.abbreviation }}
+            </button>
+            }
+        </div>
+    </mat-card>
+
+    @if (scheduleRows$ | async; as rows) {
+    <div class="schedule-grid">
+        <div class="header-cell">Employee</div>
+    @for (day of weekDates; track day.getTime()) {
+        <div class="header-cell day-header">
+            <div>{{ day | date:'EEE' }}</div>
+            <div class="day-number">{{ day | date:'d' }}</div>
+        </div>
+        }
+
+        @for (row of rows; track row.employee.id) {
         <div class="employee-cell">{{ row.employee.displayName }}</div>
 
-        <div *ngFor="let day of row.days" class="day-cell" (click)="openShiftForm(row.employee.id, day.date)">
-
-            <div *ngFor="let assignment of day.schedule?.shifts">
-
-                <div *ngIf="assignment.type === 'shift'" class="shift-card"
-                    [style.background-color]="assignment.roleColor"
-                    (click)="$event.stopPropagation(); openShiftForm(row.employee.id, day.date, assignment)">
-                    <div class="shift-time">{{ assignment.startTime }} - {{ assignment.endTime }}</div>
-                    <div class="shift-role">{{ assignment.roleName }}</div>
-                </div>
-
-                <div *ngIf="assignment.type === 'time_off'" class="shift-card time-off-card"
-                    (click)="$event.stopPropagation(); openShiftForm(row.employee.id, day.date, assignment)">
-                    {{ assignment.reason }}
-                </div>
-
+        @for (day of row.days; track day.date) {
+        <div class="day-cell" (click)="openShiftForm(row.employee.id, day.date)">
+            @for (assignment of day.schedule?.shifts; track assignment.assignmentId) {
+            @if (assignment.type === 'shift') {
+            <div class="shift-card" [style.background-color]="assignment.roleColor"
+                (click)="$event.stopPropagation(); openShiftForm(row.employee.id, day.date, assignment)">
+                <div class="shift-time">{{ assignment.startTime }} - {{ assignment.endTime }}</div>
+                <div class="shift-role">{{ assignment.roleName }}</div>
             </div>
+            }
+            @if (assignment.type === 'time_off') {
+            <div class="shift-card time-off-card"
+                (click)="$event.stopPropagation(); openShiftForm(row.employee.id, day.date, assignment)">
+                {{ assignment.reason }}
+            </div>
+            }
+            }
         </div>
-    </ng-container>
+        }
+        }
+    </div>
+    }
 </div>

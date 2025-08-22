@@ -1,5 +1,174 @@
 /* You can add global styles to this file, and also import other style files */
 @import "@angular/material/prebuilt-themes/indigo-pink.css";
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* --- Scheduler Component Styles --- */
+
+:host {
+    display: block;
+    padding: 20px;
+}
+
+/* --- Controls Styling --- */
+.scheduler-controls {
+    padding: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+    background-color: #f8f9fa;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.scheduler-controls button {
+    background-color: #3498db;
+    color: white;
+    border-radius: 4px;
+}
+
+.scheduler-controls button.mat-icon-button {
+    background-color: transparent;
+    color: #34495e;
+}
+
+.scheduler-controls button:hover {
+    background-color: #2980b9;
+}
+
+.scheduler-controls button.mat-icon-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+
+.week-display,
+.date-picker-btn {
+    font-weight: 500;
+    font-size: 1em;
+    padding: 0 10px;
+    color: #2c3e50;
+}
+
+.department-filters {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+    /* Pushes filters to the right */
+}
+
+.dept-pill {
+    --mdc-outlined-button-outline-color: #ccc;
+    --mdc-outlined-button-label-text-color: #495057;
+}
+
+.dept-pill.active {
+    background-color: #27ae60;
+    color: white;
+    --mdc-outlined-button-outline-color: #27ae60;
+}
+
+
+/* --- Grid Structure --- */
+.schedule-grid {
+    display: grid;
+    grid-template-columns: 200px repeat(7, 1fr);
+    /* Employee column + 7 day columns */
+    border: 1px solid #ccc;
+    background-color: #fff;
+    font-size: 0.9em;
+}
+
+/* --- Header and Employee Cells --- */
+.header-cell,
+.employee-cell,
+.day-cell {
+    padding: 8px;
+    border-bottom: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+}
+
+.header-cell {
+    background-color: #e9ecef;
+    font-weight: bold;
+    text-align: center;
+}
+
+.day-header {
+    line-height: 1.2;
+}
+
+.day-number {
+    font-size: 1.2em;
+    font-weight: normal;
+}
+
+.employee-cell {
+    background-color: #f8f9fa;
+    font-weight: 500;
+    position: sticky;
+    left: 0;
+    z-index: 5;
+}
+
+/* --- Day and Shift Cells --- */
+.day-cell {
+    min-height: 70px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.day-cell:hover {
+    background-color: #f0faff;
+}
+
+.shift-card,
+.time-off-card {
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    text-align: center;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    color: white;
+    /* Default text color for cards */
+}
+
+.shift-time {
+    font-weight: bold;
+}
+
+.shift-role {
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+.time-off-card {
+    background-color: #6c757d;
+    /* Dark grey for time off */
+    font-weight: bold;
+}
+
+/* ADD THIS AT THE END OF THE FILE */
+
+/* Hide the padding on the menu panel that holds the calendar */
+.hidden-calendar-menu .mat-mdc-menu-content {
+    padding: 0 !important;
+}

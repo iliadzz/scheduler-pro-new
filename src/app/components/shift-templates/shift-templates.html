@@ -58,7 +58,7 @@
                 <mat-list-item *ngFor="let template of templates">
                     <div matListItemTitle>{{template.name}}</div>
                     <div matListItemLine>
-                        {{template.start}} - {{template.end}} | Days: {{template.availableDays?.join(', ')}}
+                        {{template.start}} - {{template.end}} | Days: {{template.availableDays.join(', ')}}
                     </div>
                     <div class="list-item-actions">
                         <button mat-icon-button (click)="onEdit(template)"><mat-icon>edit</mat-icon></button>
