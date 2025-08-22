@@ -1,0 +1,30 @@
+<div class="schedule-grid" *ngIf="scheduleRows$ | async as rows">
+    <div class="header-cell">Employee</div>
+    <div *ngFor="let day of weekDates" class="header-cell day-header">
+        <div>{{ day | date:'EEE' }}</div>
+        <div class="day-number">{{ day | date:'d' }}</div>
+    </div>
+
+    <ng-container *ngFor="let row of rows">
+        <div class="employee-cell">{{ row.employee.displayName }}</div>
+
+        <div *ngFor="let day of row.days" class="day-cell" (click)="openShiftForm(row.employee.id, day.date)">
+
+            <div *ngFor="let assignment of day.schedule?.shifts">
+
+                <div *ngIf="assignment.type === 'shift'" class="shift-card"
+                    [style.background-color]="assignment.roleColor"
+                    (click)="$event.stopPropagation(); openShiftForm(row.employee.id, day.date, assignment)">
+                    <div class="shift-time">{{ assignment.startTime }} - {{ assignment.endTime }}</div>
+                    <div class="shift-role">{{ assignment.roleName }}</div>
+                </div>
+
+                <div *ngIf="assignment.type === 'time_off'" class="shift-card time-off-card"
+                    (click)="$event.stopPropagation(); openShiftForm(row.employee.id, day.date, assignment)">
+                    {{ assignment.reason }}
+                </div>
+
+            </div>
+        </div>
+    </ng-container>
+</div>

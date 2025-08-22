@@ -1,0 +1,64 @@
+<div class="departments-container">
+    <mat-card class="form-card">
+        <mat-card-header>
+            <mat-card-title>{{ isEditing ? 'Edit Department' : 'Add New Department' }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <form (ngSubmit)="onSave()" #departmentForm="ngForm" class="department-form">
+                <mat-form-field appearance="fill">
+                    <mat-label>Department Name</mat-label>
+                    <input matInput [(ngModel)]="editingDepartment.name" name="name" required
+                        placeholder="e.g., Front of House">
+                </mat-form-field>
+
+                <mat-form-field appearance="fill">
+                    <mat-label>Abbreviation</mat-label>
+                    <input matInput [(ngModel)]="editingDepartment.abbreviation" name="abbreviation" required
+                        placeholder="e.g., FOH" maxlength="4">
+                </mat-form-field>
+
+                <div class="form-actions">
+                    <button mat-flat-button color="primary" type="submit" [disabled]="!departmentForm.form.valid">
+                        {{ isEditing ? 'Save Changes' : 'Add Department' }}
+                    </button>
+                    <button mat-button type="button" (click)="resetForm()" *ngIf="isEditing">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card class="list-card">
+        <mat-card-header>
+            <mat-card-title>Available Departments</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <mat-list *ngIf="departments$ | async as departments; else loading" cdkDropList
+                (cdkDropListDropped)="onDrop($event, departments)">
+
+                <mat-list-item *ngFor="let dept of departments" cdkDrag>
+
+                    <mat-icon cdkDragHandle matListItemIcon>drag_indicator</mat-icon>
+
+                    <div matListItemTitle>{{ dept.name }} [{{ dept.abbreviation }}]</div>
+                    <div matListItemLine>Sort Order: {{ dept.sortOrder }}</div>
+
+                    <div class="list-item-actions">
+                        <button mat-icon-button (click)="onEdit(dept)" aria-label="Edit department">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" (click)="onDelete(dept.id)" aria-label="Delete department">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </mat-list-item>
+            </mat-list>
+
+            <ng-template #loading>
+                <p>Loading departments...</p>
+            </ng-template>
+
+        </mat-card-content>
+    </mat-card>
+</div>

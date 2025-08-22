@@ -1,0 +1,41 @@
+.templates-container {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    flex-wrap: wrap;
+}
+
+.form-card {
+    flex: 1;
+    min-width: 320px;
+}
+
+.list-card {
+    flex: 2;
+    min-width: 400px;
+}
+
+.template-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.time-inputs {
+    display: flex;
+    gap: 10px;
+}
+
+.time-inputs mat-form-field {
+    flex: 1;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.list-item-actions {
+    margin-left: auto;
+}

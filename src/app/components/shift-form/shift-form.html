@@ -1,0 +1,48 @@
+<h1 mat-dialog-title>Assign Shift / Time Off</h1>
+
+<mat-dialog-content>
+    <mat-tab-group [selectedIndex]="assignment.type === 'shift' ? 0 : 1"
+        (selectedIndexChange)="assignment.type = $event === 0 ? 'shift' : 'time_off'">
+
+        <mat-tab label="From Shift Template">
+            <div class="form-container">
+                <mat-form-field>
+                    <mat-label>Shift Template</mat-label>
+                    <mat-select [(ngModel)]="selectedTemplateId" name="template">
+                        <mat-option *ngFor="let template of templates$ | async" [value]="template.id">
+                            {{ template.name }} ({{ template.start }} - {{ template.end }})
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field>
+                    <mat-label>Assign Role</mat-label>
+                    <mat-select [(ngModel)]="selectedRoleId" name="role" required>
+                        <mat-option *ngFor="let role of roles$ | async" [value]="role.id">
+                            {{ role.name }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+        </mat-tab>
+
+        <mat-tab label="Time Off">
+            <div class="form-container">
+                <mat-form-field>
+                    <mat-label>Reason</mat-label>
+                    <mat-select [(ngModel)]="assignment.reason" name="reason">
+                        <mat-option value="Vacation">Vacation</mat-option>
+                        <mat-option value="Sick Leave">Sick Leave</mat-option>
+                        <mat-option value="Personal Day">Personal Day</mat-option>
+                        <mat-option value="Unpaid Time Off">Unpaid Time Off</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+        </mat-tab>
+
+    </mat-tab-group> </mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-flat-button color="primary" (click)="onSave()">Save</button>
+</mat-dialog-actions>

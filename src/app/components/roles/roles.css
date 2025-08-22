@@ -1,0 +1,40 @@
+.roles-container {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    flex-wrap: wrap;
+}
+
+.form-card {
+    flex: 1;
+    min-width: 300px;
+}
+
+.list-card {
+    flex: 2;
+    min-width: 400px;
+}
+
+.role-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.list-item-actions {
+    margin-left: auto;
+}
+
+/* Style for the color swatch in the list */
+.role-color-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
