@@ -1,35 +1,48 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
-// --- CHANGES START HERE ---
-
-// 1. Import the necessary Angular Material module for tabs
 import { MatTabsModule } from '@angular/material/tabs';
-
-// 2. Import both of your custom components
+import { MatButtonModule } from '@angular/material/button';
 import { DepartmentsComponent } from './components/departments/departments';
 import { RolesComponent } from './components/roles/roles';
-import { EmployeesComponent } from './components/employees/employees'; // <-- ADD THIS
-import { ShiftTemplatesComponent } from './components/shift-templates/shift-templates'; // <-- ADD THIS
-import { SchedulerComponent } from './components/scheduler/scheduler'; // <-- ADD THIS
-
-// --- CHANGES END HERE ---
+import { EmployeesComponent } from './components/employees/employees';
+import { ShiftTemplatesComponent } from './components/shift-templates/shift-templates';
+import { SchedulerComponent } from './components/scheduler/scheduler';
 
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
-    // 3. Add the modules to the imports array
     MatTabsModule,
-    SchedulerComponent, // Should be the first thing we see.
+    MatButtonModule,
+    SchedulerComponent,
     DepartmentsComponent,
     RolesComponent,
-    EmployeesComponent, // <-- ADD THIS
+    EmployeesComponent,
     ShiftTemplatesComponent
   ],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
+export class App implements OnInit {
   protected readonly title = signal('scheduler-pro');
+  selectedTabIndex: number = 0;
+
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+
+  ngOnInit(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      const savedIndex = localStorage.getItem('lastActiveTab');
+      if (savedIndex !== null) {
+        this.selectedTabIndex = +savedIndex;
+      }
+    }
+  }
+
+  onTabChange(index: number): void {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('lastActiveTab', index.toString());
+    }
+  }
 }

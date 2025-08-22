@@ -1,4 +1,4 @@
-<div class="shift-templates-container">
+<div class="templates-container">
     <mat-card class="list-card">
         <mat-card-header>
             <mat-card-title i18n="@@shiftTemplatesTitle">Shift Templates</mat-card-title>
@@ -6,7 +6,7 @@
         <mat-card-content>
             <mat-list>
                 @for(template of (templates$ | async); track template.id){
-                <mat-list-item (click)="selectTemplate(template)">
+                <mat-list-item (click)="onEdit(template)">
                     <div matListItemTitle>{{ template.name }}</div>
                     <div matListItemLine>{{template.start}} - {{template.end}} | Days: {{template.availableDays.join(',
                         ')}}</div>
@@ -18,7 +18,7 @@
 
     <mat-card class="form-card">
         <mat-card-header>
-            <mat-card-title>{{ (selectedTemplate$ | async) ? 'Edit Template' : 'Add New Template' }}</mat-card-title>
+            <mat-card-title>{{ templateForm.get('id')?.value ? 'Edit Template' : 'Add New Template' }}</mat-card-title>
         </mat-card-header>
         <mat-card-content>
             <form [formGroup]="templateForm" class="template-form">
@@ -27,41 +27,41 @@
                     <input matInput formControlName="name">
                 </mat-form-field>
 
-                <mat-form-field>
-                    <mat-label i18n="@@formLabelStartTime">Start Time</mat-label>
-                    <input matInput type="time" formControlName="start">
-                </mat-form-field>
+                <div class="time-inputs">
+                    <mat-form-field>
+                        <mat-label i18n="@@formLabelStartTime">Start Time</mat-label>
+                        <input matInput type="time" formControlName="start">
+                    </mat-form-field>
+
+                    <mat-form-field>
+                        <mat-label i18n="@@formLabelEndTime">End Time</mat-label>
+                        <input matInput type="time" formControlName="end">
+                    </mat-form-field>
+                </div>
 
                 <mat-form-field>
-                    <mat-label i18n="@@formLabelEndTime">End Time</mat-label>
-                    <input matInput type="time" formControlName="end">
-                </mat-form-field>
-
-                <mat-form-field>
-                    <mat-label i18n="@@formLabelRole">Role</mat-label>
-                    <mat-select formControlName="roleId">
-                        @for(role of (roles$ | async); track role.id){
-                        <mat-option [value]="role.id">{{ role.name }}</mat-option>
+                    <mat-label i18n="@@formLabelDepartments">Departments</mat-label>
+                    <mat-select formControlName="departmentIds" multiple>
+                        @for(dept of (departments$ | async); track dept.id){
+                        <mat-option [value]="dept.id">{{ dept.name }}</mat-option>
                         }
                     </mat-select>
                 </mat-form-field>
 
                 <div class="days-of-week">
                     <mat-label i18n="@@formLabelAvailableDays">Available Days</mat-label>
-                    <mat-checkbox formControlName="mon" i18n="@@dayMonday">Monday</mat-checkbox>
-                    <mat-checkbox formControlName="tue" i18n="@@dayTuesday">Tuesday</mat-checkbox>
-                    <mat-checkbox formControlName="wed" i18n="@@dayWednesday">Wednesday</mat-checkbox>
-                    <mat-checkbox formControlName="thu" i18n="@@dayThursday">Thursday</mat-checkbox>
-                    <mat-checkbox formControlName="fri" i18n="@@dayFriday">Friday</mat-checkbox>
-                    <mat-checkbox formControlName="sat" i18n="@@daySaturday">Saturday</mat-checkbox>
-                    <mat-checkbox formControlName="sun" i18n="@@daySunday">Sunday</mat-checkbox>
+                    <mat-chip-listbox formControlName="availableDays" multiple>
+                        @for(day of daysOfWeek; track day.key){
+                        <mat-chip-option [value]="day.key">{{ day.name }}</mat-chip-option>
+                        }
+                    </mat-chip-listbox>
                 </div>
             </form>
         </mat-card-content>
         <mat-card-actions>
-            <button mat-flat-button color="primary" (click)="saveTemplate()" [disabled]="templateForm.invalid"
+            <button mat-flat-button color="primary" (click)="onSave()" [disabled]="templateForm.invalid"
                 i18n="@@formSaveButton">Save</button>
-            <button mat-button (click)="clearSelection()" i18n="@@formCancelButton">Cancel</button>
+            <button mat-button (click)="resetForm()" i18n="@@formCancelButton">Cancel</button>
         </mat-card-actions>
     </mat-card>
 </div>
