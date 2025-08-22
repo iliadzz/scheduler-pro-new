@@ -37,11 +37,23 @@
                 <div class="custom-time-inputs">
                     <mat-form-field>
                         <mat-label i18n="@@formLabelCustomStart">Custom Start</mat-label>
-                        <input matInput type="time" formControlName="customStart" step="300">
+                        <mat-select formControlName="customStart">
+        @for(h of hours; track $index){
+          @for(m of minutes; track $index){
+            <mat-option [value]="h + ':' + m">{{ h }}:{{ m }}</mat-option>
+          }
+        }
+      </mat-select>
                     </mat-form-field>
                     <mat-form-field>
                         <mat-label i18n="@@formLabelCustomEnd">Custom End</mat-label>
-                        <input matInput type="time" formControlName="customEnd" step="300">
+                        <mat-select formControlName="customEnd">
+        @for(h of hours; track $index){
+          @for(m of minutes; track $index){
+            <mat-option [value]="h + ':' + m">{{ h }}:{{ m }}</mat-option>
+          }
+        }
+      </mat-select>
                     </mat-form-field>
                 </div>
             </form>

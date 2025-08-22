@@ -34,6 +34,10 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
   styleUrls: ['./shift-form.css']
 })
 export class ShiftFormComponent implements OnInit {
+  // Exposed to the template for time selection (HH and mm)
+  hours: string[] = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+  minutes: string[] = ['00','05','10','15','20','25','30','35','40','45','50','55'];
+
 
   templateShiftForm: FormGroup;
   customShiftForm: FormGroup;
