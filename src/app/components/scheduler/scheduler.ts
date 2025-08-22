@@ -16,7 +16,7 @@ import { RoleService } from '../../services/role';
 import { ShiftTemplateService } from '../../services/shift-template';
 import { ScheduleService } from '../../services/schedule';
 import { HistoryService } from '../../services/history.service';
-import { MoveOrCopyAssignmentCommand } from '../../services/schedule.commands';
+import { MoveOrCopyAssignmentCommand, ClearWeekCommand } from '../../services/schedule.commands';
 
 // Angular Material Modules
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -26,6 +26,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip'; // <-- FIX: Import tooltip module
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog';
 
@@ -59,7 +60,8 @@ export interface DropListData {
   standalone: true,
   imports: [
     CommonModule, MatButtonModule, MatIconModule, MatCardModule,
-    MatDialogModule, MatDatepickerModule, MatMenuModule, DragDropModule
+    MatDialogModule, MatDatepickerModule, MatMenuModule, DragDropModule,
+    MatTooltipModule // <-- FIX: Add tooltip module to imports
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './scheduler.html',
@@ -81,7 +83,7 @@ export class SchedulerComponent implements OnInit {
     private roleService: RoleService,
     private shiftTemplateService: ShiftTemplateService,
     private dialog: MatDialog,
-    public historyService: HistoryService // Made public to be accessible in the template
+    public historyService: HistoryService
   ) { }
 
   ngOnInit(): void {
@@ -190,7 +192,8 @@ export class SchedulerComponent implements OnInit {
         this.scheduleRows$.pipe(first()).subscribe(rows => {
           const userIds = rows.map(row => row.employee.id);
           if (userIds.length > 0) {
-            this.scheduleService.clearWeek(userIds, this.weekDates).subscribe();
+            const command = new ClearWeekCommand(this.scheduleService, userIds, this.weekDates);
+            this.historyService.execute(command);
           }
         });
       }
@@ -215,7 +218,6 @@ export class SchedulerComponent implements OnInit {
       toData.userId, toData.date,
       mode
     );
-
     this.historyService.execute(command);
   }
 

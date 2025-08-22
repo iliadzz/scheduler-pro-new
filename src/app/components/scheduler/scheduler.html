@@ -1,11 +1,11 @@
 <div class="scheduler-container">
     <mat-card class="scheduler-controls">
-        <button mat-icon-button aria-label="Undo last action" (click)="historyService.undo()"
-            [disabled]="!(historyService.canUndo$ | async)">
+        <button mat-icon-button aria-label="Undo last action" [matTooltip]="historyService.undoActionName$ | async"
+            (click)="historyService.undo()" [disabled]="!(historyService.canUndo$ | async)">
             <mat-icon>rotate_left</mat-icon>
         </button>
-        <button mat-icon-button aria-label="Redo last action" (click)="historyService.redo()"
-            [disabled]="!(historyService.canRedo$ | async)">
+        <button mat-icon-button aria-label="Redo last action" [matTooltip]="historyService.redoActionName$ | async"
+            (click)="historyService.redo()" [disabled]="!(historyService.canRedo$ | async)">
             <mat-icon>rotate_right</mat-icon>
         </button>
 
@@ -13,17 +13,17 @@
 
         <button mat-flat-button (click)="goToThisWeek()">
             <mat-icon>calendar_today</mat-icon>
-            <span>This Week</span>
+            <span i18n="@@schedulerThisWeekButton">This Week</span>
         </button>
         <button mat-flat-button (click)="changeWeek(-7)">
             <mat-icon>arrow_back</mat-icon>
-            <span>Prev</span>
+            <span i18n="@@schedulerPrevButton">Prev</span>
         </button>
         <button mat-flat-button class="date-picker-btn" [matMenuTriggerFor]="pickerMenu">
             {{ weekDates[0] | date:'MMM d' }} - {{ weekDates[6] | date:'MMM d, yyyy' }}
         </button>
         <button mat-flat-button (click)="changeWeek(7)">
-            <span>Next</span>
+            <span i18n="@@schedulerNextButton">Next</span>
             <mat-icon>arrow_forward</mat-icon>
         </button>
 
@@ -31,12 +31,14 @@
 
         <button mat-flat-button>
             <mat-icon>content_copy</mat-icon>
-            <span>Copy</span>
+            <span i18n="@@schedulerCopyButton">Copy</span>
         </button>
-        <button mat-flat-button>Events</button>
+        <button mat-flat-button>
+            <span i18n="@@schedulerEventsButton">Events</span>
+        </button>
         <button mat-flat-button (click)="onClearWeek()">
             <mat-icon>delete_sweep</mat-icon>
-            <span>Clear</span>
+            <span i18n="@@schedulerClearButton">Clear</span>
         </button>
         <button mat-icon-button aria-label="Print schedule">
             <mat-icon>print</mat-icon>
@@ -58,7 +60,7 @@
 
     @if (scheduleRows$ | async; as rows) {
     <div class="schedule-grid" cdkDropListGroup>
-        <div class="header-cell">Employee</div>
+        <div class="header-cell" i18n="@@schedulerEmployeeHeader">Employee</div>
         @for (day of weekDates; track day.getTime()) {
         <div class="header-cell day-header">
             <div>{{ day | date:'EEE' }}</div>

@@ -1,89 +1,75 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
-
-// Import Models and Services
 import { Employee } from '../../models/employee.model';
 import { Department } from '../../models/department.model';
 import { EmployeeService } from '../../services/employee';
 import { DepartmentService } from '../../services/department';
 
-// Import Angular Material Modules for Dialogs and Forms
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+// Angular Material Modules
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { provideNativeDateAdapter } from '@angular/material/core';
-import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-employee-form',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatButtonModule,
-    MatDatepickerModule,
-    MatCardModule
+    MatButtonModule
   ],
-  providers: [provideNativeDateAdapter()], // Necessary for the date picker
   templateUrl: './employee-form.html',
   styleUrls: ['./employee-form.css']
 })
 export class EmployeeFormComponent implements OnInit {
-  
-  employeeData: Partial<Employee> = {};
+  employeeForm: FormGroup;
   departments$!: Observable<Department[]>;
-  isEditing = false;
-  
-  // Termination reasons from your original project
-  terminationReasons: string[] = ["Resigned", "Terminated", "Contract Ended", "Retired", "Other"];
 
   constructor(
+    private fb: FormBuilder,
     private employeeService: EmployeeService,
     private departmentService: DepartmentService,
     public dialogRef: MatDialogRef<EmployeeFormComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: Partial<Employee>
+    @Inject(MAT_DIALOG_DATA) public data: { employee: Employee | null }
   ) {
-    // Check if data was passed in (meaning we are editing)
-    if (data && data.id) {
-      this.isEditing = true;
-      this.employeeData = { ...data }; // Work on a copy
-    }
+    this.employeeForm = this.fb.group({
+      id: [null],
+      displayName: ['', Validators.required],
+      firstName: [''],
+      lastName: [''],
+      email: ['', [Validators.required, Validators.email]],
+      phone: [''],
+      departmentId: ['', Validators.required],
+      // Add other default fields as necessary
+      status: ['Active'],
+      isVisible: [true]
+    });
   }
 
   ngOnInit(): void {
     this.departments$ = this.departmentService.getDepartments();
-  }
-
-  onSave(): void {
-    if (!this.employeeData.firstName || !this.employeeData.lastName) {
-      alert('First and Last name are required.');
-      return;
+    if (this.data.employee) {
+      this.employeeForm.patchValue(this.data.employee);
     }
-
-    // Ensure status is set
-    this.employeeData.status = this.employeeData.status || 'Active';
-    
-    this.employeeService.saveEmployee(this.employeeData as any).subscribe({
-      next: () => {
-        this.dialogRef.close(true); // Close the dialog and signal success
-      },
-      error: (err) => {
-        console.error('Failed to save employee', err);
-        alert('An error occurred while saving.');
-      }
-    });
   }
 
-  onCancel(): void {
-    this.dialogRef.close(); // Close the dialog without sending a success signal
+  onNoClick(): void {
+    this.dialogRef.close();
+  }
+
+  save(): void {
+    if (this.employeeForm.valid) {
+      this.employeeService.saveEmployee(this.employeeForm.value).subscribe(() => {
+        this.dialogRef.close(true);
+      });
+    }
   }
 }

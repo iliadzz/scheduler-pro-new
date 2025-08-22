@@ -111,6 +111,30 @@ export class ScheduleService {
     return of(undefined);
   }
 
+  getScheduleForUsersAndDates(userIds: string[], dates: Date[]): Observable<Map<string, DaySchedule>> {
+    const currentSchedule = this.schedule$.getValue();
+    const result = new Map<string, DaySchedule>();
+    for (const userId of userIds) {
+      for (const date of dates) {
+        const dateStr = this.datePipe.transform(date, 'yyyy-MM-dd')!;
+        const key = `${userId}-${dateStr}`;
+        if (currentSchedule.has(key)) {
+          result.set(key, { ...currentSchedule.get(key)! });
+        }
+      }
+    }
+    return of(result);
+  }
+
+  restoreShifts(shiftsToRestore: Map<string, DaySchedule>): Observable<void> {
+    const currentSchedule = this.schedule$.getValue();
+    shiftsToRestore.forEach((daySchedule, key) => {
+      currentSchedule.set(key, daySchedule);
+    });
+    this.schedule$.next(new Map(currentSchedule));
+    return of(undefined);
+  }
+
   private loadInitialData() {
     const newSchedule = new Map<string, DaySchedule>();
     const day1: DaySchedule = {

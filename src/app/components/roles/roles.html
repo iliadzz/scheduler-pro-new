@@ -1,67 +1,57 @@
 <div class="roles-container">
-    <mat-card class="form-card">
+    <mat-card class="list-card">
         <mat-card-header>
-            <mat-card-title>{{ isEditing ? 'Edit Role' : 'Add New Role' }}</mat-card-title>
+            <mat-card-title i18n="@@rolesTitle">Roles</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-            <form (ngSubmit)="onSave()" #roleForm="ngForm" class="role-form">
-
-                <mat-form-field appearance="fill">
-                    <mat-label>Role Name</mat-label>
-                    <input matInput [(ngModel)]="editingRole.name" name="name" required placeholder="e.g., Server">
-                </mat-form-field>
-
-                <mat-form-field appearance="fill">
-                    <mat-label>Department</mat-label>
-                    <mat-select [(ngModel)]="editingRole.departmentId" name="departmentId" required>
-                        <mat-option *ngFor="let dept of departments$ | async" [value]="dept.id">
-                            {{ dept.name }}
-                        </mat-option>
-                    </mat-select>
-                </mat-form-field>
-
-                <mat-form-field appearance="fill">
-                    <mat-label>Color</mat-label>
-                    <input matInput [(ngModel)]="editingRole.color" name="color" required placeholder="e.g., #2E86C1">
-                </mat-form-field>
-
-                <div class="form-actions">
-                    <button mat-flat-button color="primary" type="submit" [disabled]="!roleForm.form.valid">
-                        {{ isEditing ? 'Save Changes' : 'Add Role' }}
-                    </button>
-                    <button mat-button type="button" (click)="resetForm()" *ngIf="isEditing">
-                        Cancel
-                    </button>
-                </div>
-            </form>
+            <mat-list>
+                @for(role of (roles$ | async); track role.id){
+                <mat-list-item (click)="selectRole(role)">
+                    <div matListItemTitle>{{ role.name }}</div>
+                    <div matListItemLine [style.color]="role.color" i18n="@@rolesListColorLabel">Color: {{ role.color }}
+                    </div>
+                </mat-list-item>
+                }
+            </mat-list>
         </mat-card-content>
     </mat-card>
 
-    <mat-card class="list-card">
+    <mat-card class="form-card">
         <mat-card-header>
-            <mat-card-title>Available Roles</mat-card-title>
+            <mat-card-title>{{ (selectedRole$ | async) ? 'Edit Role' : 'Add New Role' }}</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-            <mat-list *ngIf="roles$ | async as roles; else loading">
-                <mat-list-item *ngFor="let role of roles">
-                    <span matListItemAvatar class="role-color-swatch" [style.backgroundColor]="role.color"></span>
-                    <div matListItemTitle>{{ role.name }}</div>
-                    <div matListItemLine>Department ID: {{ role.departmentId }}</div>
-                    <div class="list-item-actions">
-                        <button mat-icon-button (click)="onEdit(role)" aria-label="Edit role">
-                            <mat-icon>edit</mat-icon>
-                        </button>
-                        <button mat-icon-button color="warn" (click)="onDelete(role.id)" aria-label="Delete role">
-                            <mat-icon>delete</mat-icon>
-                        </button>
+            <form [formGroup]="roleForm" class="role-form">
+                <mat-form-field>
+                    <mat-label i18n="@@formLabelName">Name</mat-label>
+                    <input matInput formControlName="name">
+                </mat-form-field>
+
+                <mat-form-field>
+                    <mat-label i18n="@@formLabelDepartment">Department</mat-label>
+                    <mat-select formControlName="departmentId">
+                        @for(dept of (departments$ | async); track dept.id){
+                        <mat-option [value]="dept.id">{{ dept.name }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+
+                <div class="color-picker">
+                    <mat-label i18n="@@formLabelColor">Color</mat-label>
+                    <div class="color-input-wrapper">
+                        <input matInput formControlName="color" #colorInput>
+                        <div class="color-preview" [style.backgroundColor]="colorInput.value"
+                            (click)="colorPicker.click()"></div>
+                        <input type="color" #colorPicker [value]="colorInput.value"
+                            (input)="updateColor(colorInput, $event)">
                     </div>
-                </mat-list-item>
-            </mat-list>
-
-            <ng-template #loading>
-                <p>Loading roles...</p>
-            </ng-template>
-
+                </div>
+            </form>
         </mat-card-content>
+        <mat-card-actions>
+            <button mat-flat-button color="primary" (click)="saveRole()" [disabled]="roleForm.invalid"
+                i18n="@@formSaveButton">Save</button>
+            <button mat-button (click)="clearSelection()" i18n="@@formCancelButton">Cancel</button>
+        </mat-card-actions>
     </mat-card>
 </div>

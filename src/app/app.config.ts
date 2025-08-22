@@ -1,9 +1,10 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, provideZoneChangeDetection, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { DatePipe } from '@angular/common'; // <-- 1. IMPORT IT HERE
+import { DatePipe } from '@angular/common';
+import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 
 import { routes } from './app.routes';
-import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { HistoryService } from './services/history.service'; // <-- Fix: Import HistoryService
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -11,6 +12,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
-    DatePipe // <-- 2. ADD IT TO THE PROVIDERS ARRAY
+    DatePipe, // <-- Fix: Add comma here
+    HistoryService
   ]
 };

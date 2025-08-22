@@ -1,72 +1,43 @@
-<h1 mat-dialog-title>{{ isEditing ? 'Edit Employee' : 'Add New Employee' }}</h1>
+<h1 mat-dialog-title>{{ data.employee ? 'Edit Employee' : 'Add New Employee' }}</h1>
+<div mat-dialog-content>
+    <form [formGroup]="employeeForm" class="employee-form">
+        <mat-form-field>
+            <mat-label i18n="@@formLabelDisplayName">Display Name</mat-label>
+            <input matInput formControlName="displayName">
+        </mat-form-field>
 
-<mat-dialog-content>
-    <form (ngSubmit)="onSave()" #employeeForm="ngForm" class="employee-form-grid">
+        <mat-form-field>
+            <mat-label i18n="@@formLabelFirstName">First Name</mat-label>
+            <input matInput formControlName="firstName">
+        </mat-form-field>
 
-        <mat-card>
-            <mat-card-header><mat-card-title>Personal Details</mat-card-title></mat-card-header>
-            <mat-card-content class="form-section">
-                <mat-form-field>
-                    <mat-label>First Name</mat-label>
-                    <input matInput [(ngModel)]="employeeData.firstName" name="firstName" required>
-                </mat-form-field>
-                <mat-form-field>
-                    <mat-label>Last Name</mat-label>
-                    <input matInput [(ngModel)]="employeeData.lastName" name="lastName" required>
-                </mat-form-field>
-                <mat-form-field>
-                    <mat-label>Display Name</mat-label>
-                    <input matInput [(ngModel)]="employeeData.displayName" name="displayName">
-                </mat-form-field>
-                <mat-form-field>
-                    <mat-label>Email</mat-label>
-                    <input matInput type="email" [(ngModel)]="employeeData.email" name="email">
-                </mat-form-field>
-            </mat-card-content>
-        </mat-card>
+        <mat-form-field>
+            <mat-label i18n="@@formLabelLastName">Last Name</mat-label>
+            <input matInput formControlName="lastName">
+        </mat-form-field>
 
-        <mat-card>
-            <mat-card-header><mat-card-title>Employment Details</mat-card-title></mat-card-header>
-            <mat-card-content class="form-section">
-                <mat-form-field>
-                    <mat-label>Department</mat-label>
-                    <mat-select [(ngModel)]="employeeData.departmentId" name="departmentId">
-                        <mat-option *ngFor="let dept of departments$ | async" [value]="dept.id">
-                            {{ dept.name }}
-                        </mat-option>
-                    </mat-select>
-                </mat-form-field>
+        <mat-form-field>
+            <mat-label i18n="@@formLabelEmail">Email</mat-label>
+            <input matInput type="email" formControlName="email">
+        </mat-form-field>
 
-                <mat-form-field>
-                    <mat-label>Role</mat-label>
-                    <mat-select [(ngModel)]="employeeData.role" name="role">
-                        <mat-option value="User">User</mat-option>
-                        <mat-option value="Manager">Manager</mat-option>
-                        <mat-option value="General Manager">General Manager</mat-option>
-                    </mat-select>
-                </mat-form-field>
+        <mat-form-field>
+            <mat-label i18n="@@formLabelPhone">Phone Number</mat-label>
+            <input matInput formControlName="phone">
+        </mat-form-field>
 
-                <mat-form-field>
-                    <mat-label>Vacation Days</mat-label>
-                    <input matInput type="number" [(ngModel)]="employeeData.vacationBalance" name="vacationBalance">
-                </mat-form-field>
-
-                <mat-form-field>
-                    <mat-label>Status</mat-label>
-                    <mat-select [(ngModel)]="employeeData.status" name="status">
-                        <mat-option value="Active">Active</mat-option>
-                        <mat-option value="Terminated">Terminated</mat-option>
-                    </mat-select>
-                </mat-form-field>
-            </mat-card-content>
-        </mat-card>
-
+        <mat-form-field>
+            <mat-label i18n="@@formLabelDepartment">Department</mat-label>
+            <mat-select formControlName="departmentId">
+                @for(dept of (departments$ | async); track dept.id){
+                <mat-option [value]="dept.id">{{ dept.name }}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
     </form>
-</mat-dialog-content>
-
-<mat-dialog-actions align="end">
-    <button mat-button (click)="onCancel()">Cancel</button>
-    <button mat-flat-button color="primary" (click)="onSave()" [disabled]="!employeeForm.form.valid">
-        {{ isEditing ? 'Save Changes' : 'Create Employee' }}
-    </button>
-</mat-dialog-actions><p>employee-form works!</p>
+</div>
+<div mat-dialog-actions align="end">
+    <button mat-button (click)="onNoClick()" i18n="@@dialogCancelButton">Cancel</button>
+    <button mat-flat-button color="primary" (click)="save()" [disabled]="employeeForm.invalid"
+        i18n="@@formSaveButton">Save</button>
+</div>

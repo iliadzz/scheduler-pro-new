@@ -1,100 +1,81 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Observable } from 'rxjs';
-
-// Import Models and Services
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { Role } from '../../models/role.model';
 import { Department } from '../../models/department.model';
 import { RoleService } from '../../services/role';
 import { DepartmentService } from '../../services/department';
 
-// Import Angular Material Modules
+// Angular Material Modules
 import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-roles',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    ReactiveFormsModule,
     MatCardModule,
     MatListModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatSelectModule
+    MatSelectModule,
+    MatButtonModule
   ],
   templateUrl: './roles.html',
   styleUrls: ['./roles.css']
 })
 export class RolesComponent implements OnInit {
-
   roles$!: Observable<Role[]>;
   departments$!: Observable<Department[]>;
+  selectedRole$ = new BehaviorSubject<Role | null>(null);
+  roleForm: FormGroup;
 
-  editingRole: Partial<Role> = {};
-  isEditing = false;
-  
-  // We are injecting both services now
   constructor(
+    private fb: FormBuilder,
     private roleService: RoleService,
     private departmentService: DepartmentService
-  ) { }
-
-  ngOnInit(): void {
-    this.loadData();
+  ) {
+    this.roleForm = this.fb.group({
+      id: [null],
+      name: ['', Validators.required],
+      departmentId: ['', Validators.required],
+      color: ['#000000', Validators.required]
+    });
   }
 
-  loadData(): void {
+  ngOnInit(): void {
     this.roles$ = this.roleService.getRoles();
     this.departments$ = this.departmentService.getDepartments();
   }
 
-  onEdit(role: Role): void {
-    this.editingRole = { ...role };
-    this.isEditing = true;
+  selectRole(role: Role): void {
+    this.selectedRole$.next(role);
+    this.roleForm.patchValue(role);
   }
 
-  onDelete(roleId: string): void {
-    if (confirm('Are you sure you want to delete this role?')) {
-      this.roleService.deleteRole(roleId).subscribe();
+  clearSelection(): void {
+    this.selectedRole$.next(null);
+    this.roleForm.reset({ color: '#000000' });
+  }
+
+  saveRole(): void {
+    if (this.roleForm.valid) {
+      this.roleService.saveRole(this.roleForm.value).subscribe(() => {
+        this.clearSelection();
+      });
     }
   }
 
-  onSave(): void {
-    if (!this.editingRole.name || !this.editingRole.departmentId || !this.editingRole.color) {
-      alert('Please fill out all fields for the role.');
-      return;
-    }
-
-    const roleToSave: Omit<Role, 'id'> & { id?: string } = {
-      id: this.editingRole.id,
-      name: this.editingRole.name,
-      color: this.editingRole.color,
-      departmentId: this.editingRole.departmentId
-    };
-
-    this.roleService.saveRole(roleToSave).subscribe({
-      next: () => {
-        this.resetForm();
-      },
-      error: (err) => {
-        console.error('Error saving role', err);
-        alert('Failed to save role.');
-      }
-    });
-  }
-
-  resetForm(): void {
-    this.editingRole = {};
-    this.isEditing = false;
+  updateColor(colorInput: HTMLInputElement, event: Event): void {
+    const color = (event.target as HTMLInputElement).value;
+    colorInput.value = color;
+    this.roleForm.get('color')?.setValue(color);
   }
 }

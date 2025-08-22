@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common';
       <p>{{ data.message }}</p>
     </div>
     <div mat-dialog-actions align="end">
-      <button mat-button (click)="onNoClick()">Cancel</button>
+      <button mat-button (click)="onNoClick()" i18n="@@dialogCancelButton">Cancel</button>
       <button mat-flat-button color="warn" [mat-dialog-close]="true" cdkFocusInitial>
         {{ data.confirmText || 'Confirm' }}
       </button>

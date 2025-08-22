@@ -1,8 +1,10 @@
 import { Command } from './history.service';
 import { ScheduleService } from './schedule';
-import { ShiftAssignment } from '../models/schedule.model';
+import { ShiftAssignment, DaySchedule } from '../models/schedule.model';
 
 export class MoveOrCopyAssignmentCommand implements Command {
+  public readonly name: string; // <-- FIX: Add the 'name' property
+
   constructor(
     private scheduleService: ScheduleService,
     private assignment: ShiftAssignment,
@@ -11,33 +13,49 @@ export class MoveOrCopyAssignmentCommand implements Command {
     private toUserId: string,
     private toDate: Date,
     private mode: 'move' | 'copy'
-  ) {}
+  ) {
+    // FIX: Set the name in the constructor
+    this.name = mode === 'copy' ? 'Copy Shift' : 'Move Shift';
+  }
 
   execute(): void {
     this.scheduleService.moveOrCopyAssignment(
-      this.assignment,
-      this.fromUserId, this.fromDate,
-      this.toUserId, this.toDate,
-      this.mode
+      this.assignment, this.fromUserId, this.fromDate,
+      this.toUserId, this.toDate, this.mode
     ).subscribe();
   }
 
   undo(): void {
-    // To undo a move, we simply move it back.
-    // To undo a copy, we need a way to delete the copied item.
-    // For now, we'll focus on the 'move' undo. A full copy-undo is more complex.
     if (this.mode === 'move') {
       this.scheduleService.moveOrCopyAssignment(
-        this.assignment,
-        this.toUserId, this.toDate,     // "from" and "to" are swapped
-        this.fromUserId, this.fromDate,
-        'move' // Always a move when undoing
+        this.assignment, this.toUserId, this.toDate,
+        this.fromUserId, this.fromDate, 'move'
       ).subscribe();
     } else {
-        // A more robust implementation for undoing a 'copy' would be to
-        // get the new assignmentId from the service and then call delete.
-        // For now, we'll log a message.
-        console.warn("Undo for 'copy' operation not fully implemented yet.");
+      console.warn("Undo for 'copy' operation not fully implemented yet.");
     }
+  }
+}
+
+export class ClearWeekCommand implements Command {
+  public readonly name = 'Clear Week'; // <-- FIX: Add the 'name' property
+  private deletedShifts: Map<string, DaySchedule> = new Map();
+
+  constructor(
+    private scheduleService: ScheduleService,
+    private userIds: string[],
+    private weekDates: Date[]
+  ) {}
+
+  execute(): void {
+    this.scheduleService.getScheduleForUsersAndDates(this.userIds, this.weekDates)
+      .subscribe(shiftsToClear => {
+        this.deletedShifts = shiftsToClear;
+        this.scheduleService.clearWeek(this.userIds, this.weekDates).subscribe();
+      });
+  }
+
+  undo(): void {
+    this.scheduleService.restoreShifts(this.deletedShifts).subscribe();
   }
 }

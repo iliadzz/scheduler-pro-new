@@ -1,75 +1,67 @@
-<div class="templates-container">
-    <mat-card class="form-card">
-        <mat-card-header>
-            <mat-card-title>{{ isEditing ? 'Edit Shift Template' : 'Add New Shift Template' }}</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-            <form (ngSubmit)="onSave()" #templateForm="ngForm" class="template-form">
-
-                <mat-form-field>
-                    <mat-label>Template Name</mat-label>
-                    <input matInput [(ngModel)]="editingTemplate.name" name="name" required>
-                </mat-form-field>
-
-                <div class="time-inputs">
-                    <mat-form-field>
-                        <mat-label>Start Time</mat-label>
-                        <input matInput type="time" [(ngModel)]="editingTemplate.start" name="start" required>
-                    </mat-form-field>
-                    <mat-form-field>
-                        <mat-label>End Time</mat-label>
-                        <input matInput type="time" [(ngModel)]="editingTemplate.end" name="end" required>
-                    </mat-form-field>
-                </div>
-
-                <label class="mat-label">Available Days</label>
-                <mat-chip-listbox multiple [(ngModel)]="editingTemplate.availableDays" name="availableDays">
-                    <mat-chip-option *ngFor="let day of daysOfWeek" [value]="day.key">
-                        {{day.name}}
-                    </mat-chip-option>
-                </mat-chip-listbox>
-
-                <label class="mat-label">Departments</label>
-                <mat-chip-listbox multiple [(ngModel)]="editingTemplate.departmentIds" name="departmentIds">
-                    <mat-chip-option *ngFor="let dept of departments$ | async" [value]="dept.id">
-                        {{dept.abbreviation}}
-                    </mat-chip-option>
-                </mat-chip-listbox>
-
-                <div class="form-actions">
-                    <button mat-flat-button color="primary" type="submit" [disabled]="!templateForm.form.valid">
-                        {{ isEditing ? 'Save Changes' : 'Add Template' }}
-                    </button>
-                    <button mat-button type="button" (click)="resetForm()" *ngIf="isEditing">
-                        Cancel
-                    </button>
-                </div>
-
-            </form>
-        </mat-card-content>
-    </mat-card>
-
+<div class="shift-templates-container">
     <mat-card class="list-card">
         <mat-card-header>
-            <mat-card-title>Available Templates</mat-card-title>
+            <mat-card-title i18n="@@shiftTemplatesTitle">Shift Templates</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-            <mat-list *ngIf="templates$ | async as templates; else loading">
-                <mat-list-item *ngFor="let template of templates">
-                    <div matListItemTitle>{{template.name}}</div>
-                    <div matListItemLine>
-                        {{template.start}} - {{template.end}} | Days: {{template.availableDays.join(', ')}}
-                    </div>
-                    <div class="list-item-actions">
-                        <button mat-icon-button (click)="onEdit(template)"><mat-icon>edit</mat-icon></button>
-                        <button mat-icon-button color="warn"
-                            (click)="onDelete(template.id)"><mat-icon>delete</mat-icon></button>
-                    </div>
+            <mat-list>
+                @for(template of (templates$ | async); track template.id){
+                <mat-list-item (click)="selectTemplate(template)">
+                    <div matListItemTitle>{{ template.name }}</div>
+                    <div matListItemLine>{{template.start}} - {{template.end}} | Days: {{template.availableDays.join(',
+                        ')}}</div>
                 </mat-list-item>
+                }
             </mat-list>
-            <ng-template #loading>
-                <p>Loading templates...</p>
-            </ng-template>
         </mat-card-content>
     </mat-card>
-</div><p>shift-templates works!</p>
+
+    <mat-card class="form-card">
+        <mat-card-header>
+            <mat-card-title>{{ (selectedTemplate$ | async) ? 'Edit Template' : 'Add New Template' }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <form [formGroup]="templateForm" class="template-form">
+                <mat-form-field>
+                    <mat-label i18n="@@formLabelName">Template Name</mat-label>
+                    <input matInput formControlName="name">
+                </mat-form-field>
+
+                <mat-form-field>
+                    <mat-label i18n="@@formLabelStartTime">Start Time</mat-label>
+                    <input matInput type="time" formControlName="start">
+                </mat-form-field>
+
+                <mat-form-field>
+                    <mat-label i18n="@@formLabelEndTime">End Time</mat-label>
+                    <input matInput type="time" formControlName="end">
+                </mat-form-field>
+
+                <mat-form-field>
+                    <mat-label i18n="@@formLabelRole">Role</mat-label>
+                    <mat-select formControlName="roleId">
+                        @for(role of (roles$ | async); track role.id){
+                        <mat-option [value]="role.id">{{ role.name }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+
+                <div class="days-of-week">
+                    <mat-label i18n="@@formLabelAvailableDays">Available Days</mat-label>
+                    <mat-checkbox formControlName="mon" i18n="@@dayMonday">Monday</mat-checkbox>
+                    <mat-checkbox formControlName="tue" i18n="@@dayTuesday">Tuesday</mat-checkbox>
+                    <mat-checkbox formControlName="wed" i18n="@@dayWednesday">Wednesday</mat-checkbox>
+                    <mat-checkbox formControlName="thu" i18n="@@dayThursday">Thursday</mat-checkbox>
+                    <mat-checkbox formControlName="fri" i18n="@@dayFriday">Friday</mat-checkbox>
+                    <mat-checkbox formControlName="sat" i18n="@@daySaturday">Saturday</mat-checkbox>
+                    <mat-checkbox formControlName="sun" i18n="@@daySunday">Sunday</mat-checkbox>
+                </div>
+            </form>
+        </mat-card-content>
+        <mat-card-actions>
+            <button mat-flat-button color="primary" (click)="saveTemplate()" [disabled]="templateForm.invalid"
+                i18n="@@formSaveButton">Save</button>
+            <button mat-button (click)="clearSelection()" i18n="@@formCancelButton">Cancel</button>
+        </mat-card-actions>
+    </mat-card>
+</div>

@@ -1,22 +1,16 @@
-<mat-tab-group>
-    
-    <mat-tab label="Scheduler">
+<div class="app-container">
+    <nav class="tab-nav">
+        <button mat-tab-link i18n="@@mainTabScheduler">Scheduler</button>
+        <button mat-tab-link i18n="@@mainTabDepartments">Departments</button>
+        <button mat-tab-link i18n="@@mainTabRoles">Roles</button>
+        <button mat-tab-link i18n="@@mainTabEmployees">Employees</button>
+        <button mat-tab-link i18n="@@mainTabShiftTemplates">Shift Templates</button>
+    </nav>
+    <main class="tab-content">
         <app-scheduler></app-scheduler>
-    </mat-tab>
-
-    <mat-tab label="Departments">
         <app-departments></app-departments>
-    </mat-tab>
-
-    <mat-tab label="Roles">
         <app-roles></app-roles>
-    </mat-tab>
-
-    <mat-tab label="Employees">
         <app-employees></app-employees>
-    </mat-tab>
-    
-    <mat-tab label="Shift Templates">
         <app-shift-templates></app-shift-templates>
-    </mat-tab>
-</mat-tab-group>
+    </main>
+</div>
