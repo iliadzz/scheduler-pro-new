@@ -1,4 +1,5 @@
 import { ApplicationConfig, provideZoneChangeDetection, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { provideRouter } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
@@ -8,6 +9,7 @@ import { HistoryService } from './services/history.service'; // <-- Fix: Import 
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideNativeDateAdapter(),
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),

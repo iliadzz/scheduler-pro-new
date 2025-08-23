@@ -1,153 +1,177 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { Observable } from 'rxjs';
-import { Role } from '../../models/role.model';
-import { ShiftTemplate } from '../../models/shift-template.model';
-import { ShiftAssignment } from '../../models/schedule.model';
-import { RoleService } from '../../services/role';
-import { ShiftTemplateService } from '../../services/shift-template';
-import { ScheduleService } from '../../services/schedule';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTabsModule } from '@angular/material/tabs';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { SettingsService } from '../../services/settings';
 
 @Component({
   selector: 'app-shift-form',
   standalone: true,
+  templateUrl: './shift-form.html',
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
     MatTabsModule,
-    MatCheckboxModule
-  ],
-  templateUrl: './shift-form.html',
-  styleUrls: ['./shift-form.css']
+    MatDialogModule
+  ]
 })
 export class ShiftFormComponent implements OnInit {
-  // Exposed to the template for time selection (HH and mm)
-  hours: string[] = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
-  minutes: string[] = ['00','05','10','15','20','25','30','35','40','45','50','55'];
+  selectedTabIndex = 0;
+  is12h = false;
 
+  // Forms
+  templateShiftForm!: FormGroup;
+  customShiftForm!: FormGroup;
+  timeOffForm!: FormGroup;
 
-  templateShiftForm: FormGroup;
-  customShiftForm: FormGroup;
-  timeOffForm: FormGroup;
-
-  roles$!: Observable<Role[]>;
-  templates$!: Observable<ShiftTemplate[]>;
-  selectedTabIndex: number = 0;
+  // Prefer arrays provided by the opener via MAT_DIALOG_DATA to avoid service coupling
+  get rolesList(): Array<{ id: any; name: string }> {
+    return (this.data?.roles as Array<{ id: any; name: string }>) ?? [];
+  }
+  get templatesList(): Array<{ id: any; name: string }> {
+    return (this.data?.templates as Array<{ id: any; name: string }>) ?? [];
+  }
 
   constructor(
     private fb: FormBuilder,
-    private roleService: RoleService,
-    private templateService: ShiftTemplateService,
-    private scheduleService: ScheduleService,
-    public dialogRef: MatDialogRef<ShiftFormComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { userId: string, date: string, assignment?: ShiftAssignment }
-  ) {
+    private dialogRef: MatDialogRef<ShiftFormComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private settingsService: SettingsService,
+  ) {}
+
+  ngOnInit(): void {
+    this.settingsService.load();
+    this.is12h = this.settingsService.timeFormat === '12h';
+
+    // Forms
     this.templateShiftForm = this.fb.group({
       roleId: [null, Validators.required],
       shiftTemplateId: [null, Validators.required],
     });
 
     this.customShiftForm = this.fb.group({
-        roleId: [null, Validators.required],
-        customStart: [null, Validators.required],
-        customEnd: [null, Validators.required]
+      roleId: [null, Validators.required],
+      customStartHour: [null, Validators.required],
+      customStartMinute: [null, Validators.required],
+      customStartPeriod: ['AM'], // only used in 12h mode
+      customEndHour: [null, Validators.required],
+      customEndMinute: [null, Validators.required],
+      customEndPeriod: ['PM'],   // only used in 12h mode
     });
 
     this.timeOffForm = this.fb.group({
-      reason: [null, Validators.required],
+      reason: ['']
     });
 
-    if (data.assignment) {
-      if (data.assignment.type === 'shift') {
-        if (data.assignment.isCustom) {
-          this.customShiftForm.patchValue(data.assignment);
-          this.selectedTabIndex = 1;
-        } else {
-          this.templateShiftForm.patchValue(data.assignment);
-          this.selectedTabIndex = 0;
-        }
-      } else if (data.assignment.type === 'time_off') {
-        this.timeOffForm.patchValue(data.assignment);
+    // Hydrate when editing
+    if (this.data?.assignment) {
+      const a = this.data.assignment;
+      if (a.shiftTemplateId) {
+        this.selectedTabIndex = 0;
+        this.templateShiftForm.patchValue({ roleId: a.roleId, shiftTemplateId: a.shiftTemplateId });
+      } else if (a.customStart && a.customEnd) {
+        this.selectedTabIndex = 1;
+        this.patchFromHhMm(a.customStart, true);
+        this.patchFromHhMm(a.customEnd, false);
+        this.customShiftForm.patchValue({ roleId: a.roleId });
+      } else if (a.type === 'timeOff') {
         this.selectedTabIndex = 2;
+        this.timeOffForm.patchValue({ reason: a.reason ?? '' });
       }
     }
   }
 
-  ngOnInit(): void {
-    this.roles$ = this.roleService.getRoles();
-    this.templates$ = this.templateService.getShiftTemplates();
+  onTabChange(idx: number) {
+    this.selectedTabIndex = idx;
   }
 
-  onNoClick(): void {
+  onNoClick() {
     this.dialogRef.close();
   }
 
-  save(): void {
-    let assignmentToSave: Partial<ShiftAssignment> | null = null;
-    
-    // Logic for the assign shift tab
+  isSaveDisabled(): boolean {
+    if (this.selectedTabIndex === 0) return !this.templateShiftForm.valid;
+    if (this.selectedTabIndex === 1) return !this.customShiftForm.valid;
+    if (this.selectedTabIndex === 2) return !this.timeOffForm.valid;
+    return true;
+  }
+
+  save() {
+    let assignmentToSave: any = null;
+
     if (this.selectedTabIndex === 0 && this.templateShiftForm.valid) {
+      const v = this.templateShiftForm.value as any;
       assignmentToSave = {
-        ...this.templateShiftForm.value,
+        type: 'shift',
+        roleId: v.roleId,
+        shiftTemplateId: v.shiftTemplateId,
         isCustom: false,
-        customStart: null,
-        customEnd: null,
-        assignmentId: this.data.assignment?.assignmentId || `assign-${Date.now()}`,
-        type: 'shift'
+        assignmentId: this.data?.assignment?.assignmentId ?? `assign-${Date.now()}`
       };
-    } 
-    // Logic for the custom shift tab
-    else if (this.selectedTabIndex === 1 && this.customShiftForm.valid) {
+    } else if (this.selectedTabIndex === 1 && this.customShiftForm.valid) {
+      const v = this.customShiftForm.value as any;
+      const start = this.toHhMm(v.customStartHour, v.customStartMinute, v.customStartPeriod);
+      const end = this.toHhMm(v.customEndHour, v.customEndMinute, v.customEndPeriod);
       assignmentToSave = {
-        ...this.customShiftForm.value,
+        type: 'shift',
+        roleId: v.roleId,
+        customStart: start,
+        customEnd: end,
         isCustom: true,
         shiftTemplateId: null,
-        assignmentId: this.data.assignment?.assignmentId || `assign-${Date.now()}`,
-        type: 'shift'
+        assignmentId: this.data?.assignment?.assignmentId ?? `assign-${Date.now()}`
       };
-    } 
-    // Logic for the time off tab
-    else if (this.selectedTabIndex === 2 && this.timeOffForm.valid) {
+    } else if (this.selectedTabIndex === 2 && this.timeOffForm.valid) {
+      const v = this.timeOffForm.value as any;
       assignmentToSave = {
-        ...this.timeOffForm.value,
-        assignmentId: this.data.assignment?.assignmentId || `assign-${Date.now()}`,
-        type: 'time_off'
+        type: 'timeOff',
+        reason: v.reason ?? '',
+        assignmentId: this.data?.assignment?.assignmentId ?? `assign-${Date.now()}`
       };
     }
-    
+
     if (assignmentToSave) {
-      this.scheduleService.saveAssignment(this.data.userId, this.data.date, assignmentToSave as ShiftAssignment).subscribe(() => {
-        this.dialogRef.close(true);
-      });
+      this.dialogRef.close(assignmentToSave);
     }
   }
 
-  isSaveDisabled(): boolean {
-    if (this.selectedTabIndex === 0) {
-      return this.templateShiftForm.invalid;
-    } else if (this.selectedTabIndex === 1) {
-      return this.customShiftForm.invalid;
-    } else if (this.selectedTabIndex === 2) {
-      return this.timeOffForm.invalid;
+  private toHhMm(hour: string | number, minute: string | number, period?: 'AM'|'PM'): string {
+    let h = typeof hour === 'number' ? hour : parseInt(hour as string, 10);
+    const m = typeof minute === 'number' ? minute : parseInt(minute as string, 10);
+    if (this.is12h) {
+      if (period === 'AM' && h === 12) h = 0;
+      if (period === 'PM' && h !== 12) h += 12;
     }
-    return true; // Fallback
+    return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
   }
 
-  // Update the selectedTabIndex when the tab changes
-  onTabChange(index: number): void {
-    this.selectedTabIndex = index;
+  private patchFromHhMm(hhmm: string, isStart: boolean) {
+    const [H, M] = (hhmm ?? '').split(':').map(x => parseInt(x, 10));
+    if (Number.isNaN(H) || Number.isNaN(M)) return;
+
+    if (this.is12h) {
+      const period: 'AM'|'PM' = H >= 12 ? 'PM' : 'AM';
+      const h12 = H % 12 === 0 ? 12 : H % 12;
+      if (isStart) {
+        this.customShiftForm.patchValue({ customStartHour: String(h12).padStart(2,'0'), customStartMinute: String(M).padStart(2,'0'), customStartPeriod: period });
+      } else {
+        this.customShiftForm.patchValue({ customEndHour: String(h12).padStart(2,'0'), customEndMinute: String(M).padStart(2,'0'), customEndPeriod: period });
+      }
+    } else {
+      if (isStart) {
+        this.customShiftForm.patchValue({ customStartHour: String(H).padStart(2,'0'), customStartMinute: String(M).padStart(2,'0') });
+      } else {
+        this.customShiftForm.patchValue({ customEndHour: String(H).padStart(2,'0'), customEndMinute: String(M).padStart(2,'0') });
+      }
+    }
   }
 }
